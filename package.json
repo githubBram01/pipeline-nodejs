@@ -1,4 +1,11 @@
 {
+  "scripts": {
+    "test": "jest src/tests",
+    "build": "echo 'Build complete'"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
   "dependencies": {
     "express": "^5.2.1"
   }
