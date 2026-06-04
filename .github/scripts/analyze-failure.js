@@ -36,7 +36,7 @@ const requestBody = JSON.stringify({
   generationConfig: { maxOutputTokens: 1024 }
 });
 
-const path = `/v1beta/models/gemini-3.0-flash:generateContent?key=${apiKey}`;
+const path = `/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
 
 const options = {
   hostname: 'generativelanguage.googleapis.com',
