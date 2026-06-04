@@ -37,3 +37,12 @@ Thumbs.db
 # Build output
 dist/
 build/
+client/dist/
+
+# SQLite database
+*.db
+*.db-shm
+*.db-wal
+
+# Client dependencies
+client/node_modules/

@@ -1,12 +1,31 @@
 {
+  "name": "vehicle-evaluation-api",
+  "version": "1.0.0",
+  "main": "src/server.js",
   "scripts": {
-    "test": "jest src/tests",
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest src/tests --forceExit",
     "build": "echo 'Build complete'"
   },
-  "devDependencies": {
-    "jest": "^29.7.0"
-  },
   "dependencies": {
+    "better-sqlite3": "^9.4.3",
+    "cors": "^2.8.5",
     "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.0",
+    "supertest": "^7.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFiles": [
+      "<rootDir>/src/tests/setup.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/client/"
+    ]
   }
 }
