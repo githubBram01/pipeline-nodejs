@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - vehicles-data:/data
+    networks:
+      - coolify
+    restart: unless-stopped
+
+volumes:
+  vehicles-data:
+
+networks:
+  coolify:
+    external: true
