@@ -72,3 +72,15 @@ jobs:
           name: frontend-dist
           path: client/dist
           retention-days: 7
+
+  deploy:
+    name: Deploy to Production
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Trigger Coolify deployment
+        run: |
+          curl --fail --request GET \
+            --url "${{ secrets.COOLIFY_DEPLOY_URL }}" \
+            --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
