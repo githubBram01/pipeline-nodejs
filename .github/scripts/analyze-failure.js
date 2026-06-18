@@ -56,26 +56,22 @@ const req = https.request(options, (res) => {
       const parsed = JSON.parse(data);
       if (parsed.error) {
         console.error('Gemini API error:', parsed.error.message);
-        writeOutput('has_analysis', 'false');
-        writeOutput('analysis', '');
-        process.exit(0);
+        process.exit(1);
       }
       const analysis = parsed.candidates?.[0]?.content?.parts?.[0]?.text || '';
       console.log('Analysis generated successfully');
       writeOutput('has_analysis', 'true');
       writeOutput('analysis', analysis);
     } catch (err) {
-      console.error('Failed to parse response:', err.message);
-      writeOutput('has_analysis', 'false');
-      writeOutput('analysis', '');
+      console.error('Failed to parse Gemini response:', err.message);
+      process.exit(1);
     }
   });
 });
 
 req.on('error', (err) => {
-  console.error('Request failed:', err.message);
-  writeOutput('has_analysis', 'false');
-  writeOutput('analysis', '');
+  console.error('Gemini request failed:', err.message);
+  process.exit(1);
 });
 
 req.write(requestBody);
