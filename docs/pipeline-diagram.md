@@ -2,65 +2,65 @@
 
 ```mermaid
 flowchart TD
-    DEV["👨‍💻 Developer"] -->|"git push / open PR"| REPO
+    DEV["Developer\ngit push / open PR"]
 
-    subgraph REPO["☁️ GitHub Repository"]
-        direction LR
-        MAIN["main branch"]
-        PR["feature branch / PR"]
-    end
+    DEV --> CI
 
-    REPO -->|"on: push / pull_request"| PIPELINE
-
-    subgraph PIPELINE["🔄 GitHub Actions — Vehicle Evaluation CI/CD"]
+    subgraph CI["GitHub Actions — CI"]
         direction TB
-
-        subgraph TESTS["Parallel Test Stage"]
-            direction LR
-            BACKEND["🧪 test-backend\nJest + Supertest\nNode.js 20\nSQLite :memory:"]
-            FRONTEND["🧪 test-frontend\nVitest + Testing Library\nNode.js 20"]
-        end
-
-        GATE{"Alle tests\ngeslaagd?"}
-
-        BUILD["🏗️ build\nVite production build\nArtifact upload"]
-        FAIL["❌ Pipeline mislukt"]
+        BACKEND["test-backend\nJest + Supertest · Node.js 20 · SQLite :memory:"]
+        FRONTEND["test-frontend\nVitest + Testing Library · Node.js 20"]
+        BACKEND & FRONTEND --> GATE{"All tests passed?"}
     end
 
-    TESTS --> GATE
-    GATE -- "✅ ja (alleen main)" --> BUILD
-    GATE -- "❌ nee" --> FAIL
+    GATE -- "no" --> AI_ANALYSIS
+    GATE -- "yes · main only" --> CD
 
-    FAIL -->|"workflow_run event"| AI_PIPELINE
-
-    subgraph AI_PIPELINE["🤖 AI Failure Analysis — GitHub Actions"]
-        LOGS["📋 Logs ophalen\nvia GitHub API"]
-        GEMINI["✨ Gemini 3.5 Flash\nOorzaak analyseren"]
-        COMMENT["💬 Diagnose plaatsen\nals PR / commit comment"]
+    subgraph CD["GitHub Actions — CD"]
+        BUILD["build\nVite production build"]
+        BUILD_GATE{"Build\nsucceeded?"}
+        DEPLOY["deploy\nPOST Coolify webhook"]
+        BUILD_FAILED["Build failed\nno deploy"]
+        BUILD --> BUILD_GATE
+        BUILD_GATE -- "yes" --> DEPLOY
+        BUILD_GATE -- "no" --> BUILD_FAILED
     end
 
-    LOGS --> GEMINI --> COMMENT
-    COMMENT -->|"🔔 notificatie"| DEV
+    DEPLOY --> COOLIFY
 
-    BUILD --> DOCKER
-
-    subgraph DEPLOY["🚀 Deployment — toekomst"]
-        DOCKER["🐳 Docker\nImage bouwen\n& pushen naar registry"]
-        K8S["☸️ Kubernetes\nDeploy naar\ncluster"]
-        ENV["🌍 Live omgeving\nbijv. GKE / AKS / EKS"]
+    subgraph COOLIFY["Coolify"]
+        DOCKER_BUILD["Docker build\ndocker-compose.yaml + Dockerfile\nStage 1: Vite frontend build\nStage 2: Express API + static assets"]
+        CONTAINER["Running container\nExpress API serves React + /api/*\nSQLite persisted on /data volume"]
+        DOCKER_BUILD --> CONTAINER
+        CONTAINER --> DISCORD["Discord notification\ndeploy success / failure"]
     end
 
-    DOCKER --> K8S --> ENV
+    CONTAINER --> USER(["User visits production"])
 
-    classDef action fill:#1a1a2e,color:#fff,stroke:#4a4a8a
+    subgraph AI_ANALYSIS["GitHub Actions — AI Failure Analysis"]
+        LOGS["Collect failed job logs\nvia GitHub API"]
+        GEMINI["Gemini AI\nAnalyze root cause"]
+        POST_OK["Post analysis comment"]
+        POST_ERR["Post error comment\n(API unavailable)"]
+
+        LOGS --> GEMINI
+        GEMINI -- "success" --> POST_OK
+        GEMINI -- "API error" --> POST_ERR
+    end
+
+    POST_OK & POST_ERR --> NOTIFY["PR / commit comment\n→ Developer"]
+
+    classDef default fill:#1a1a2e,color:#fff,stroke:#4a4a8a
     classDef test fill:#1e3a5f,color:#fff,stroke:#2563eb
     classDef ai fill:#1a3a2e,color:#fff,stroke:#16a34a
-    classDef deploy fill:#3a1a1a,color:#fff,stroke:#dc2626
+    classDef prod fill:#3a1a1a,color:#fff,stroke:#dc2626
     classDef gate fill:#3a3a1a,color:#fff,stroke:#d97706
 
     class BACKEND,FRONTEND test
-    class LOGS,GEMINI,COMMENT ai
-    class DOCKER,K8S,ENV deploy
-    class GATE gate
-    class BUILD,FAIL action
+    class LOGS,GEMINI,POST_OK,POST_ERR ai
+    class DOCKER_BUILD,CONTAINER prod
+    class DISCORD ai
+    class GATE,BUILD_GATE gate
+    class BUILD_FAILED default
+    class NOTIFY ai
 ```
